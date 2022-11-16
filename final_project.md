@@ -1,4 +1,4 @@
-final_project
+TRGN510 Final Project
 ================
 
 # **Title**
@@ -33,8 +33,58 @@ selected 30 samples of alcohol consumption history with gene counts file
 by STAR.
 
 # **Method**
+I will utilize unstrand counts in this differential expression analysis because I do not know of the strand-specific protocol of this dataset
+
+Extract the column #4 which is unstranded counts of the sample
+```{bash}
+awk'{print $4}' AASX.tsv > AASX.txt
+```
+
+Remove the first line of the file without printing
+```{bash}
+tail -n +2 AASX.txt > AASX.tmp && mv AASX.tmp AASX.txt
+```
+
+Replace_header.sh to change the column of each .txt file to its file name
+```{bash}
+./replace_header.sh
+```
+
+Extract the gene_id, the column #1, from one of .tsv file
+```{bash}
+awk '{print $1}' A4OS.tsv > gene_id.txt
+```
+
+Remove the first line of the file without printing
+```{bash}
+tail -n +2 gene_id.txt > gene_id.tmp && mv gene_id.tmp gene_id.txt
+```
+
+Remove row #2 to #4
+```{bash}
+awk '!/^N_*/' gene_id.txt > gene_id.tmp && mv gene_id.tmp gene_id.txt
+```
+
+Merged counts
+```{bash}
+paste gene_id.txt A4OF.txt A4OJ.txt A4OR.txt A4OS.txt A4QS.txt A6BV.txt A6DN.txt A6DQ.txt A6FB.txt A6FH.txt A6FW.txt A6KZ.txt A6L4.txt A6L6.txt A6XG.txt A6Y0.txt A7BO.txt A7RE.txt A88T.txt A88V.txt A891.txt A8EQ.txt A8NF.txt A8NG.txt A8NH.txt A8NI.txt A8NJ.txt A8NL.txt A8NM.txt A8NR.txt A8NS.txt A8NU.txt A8NV.txt A8W8.txt A8WC.txt A8WG.txt A939.txt A93C.txt A93D.txt A93E.txt A9CJ.txt A9GF.txt A9GH.txt A9GI.txt A9GJ.txt A9GK.txt A9GL.txt A9GM.txt A9GN.txt A9GO.txt A9GQ.txt A9GR.txt A9W5.txt AA4D.txt AASW.txt AASX.txt > merged_gene_counts.txt
+```
 
 ## Creating Sample Sheet
+
+I change the sample id in the sample_sheet.tsv in order to match with the sample id in the count_matrix.txt. Also, I change the 1st column name to "sample_id" from "case_submitter_id"
+
+```{bash}
+sed 's/^TCGA-.*-//g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+
+sed 's/case_submitter_id/sample_id/g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+```
+
+## Creating Sample Sheet
+
+I change the sample id in the sample_sheet.tsv in order to match with the sample id in the count_matrix.txt. Also, I change the 1st column name to "sample_id" from "case_submitter_id"
+
+---
 
 
 
@@ -100,14 +150,6 @@ count_matrix <- count_matrix[-c(1)]
 # Read in the sample sheet
 sampletable <- read_tsv('~/Desktop/raw_data/sample_sheet.tsv')
 ```
-
-    ## Rows: 56 Columns: 2
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: "\t"
-    ## chr (2): sample_id, alcohol_history
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ``` r
 # Change column #1 (sample_id) into row name
