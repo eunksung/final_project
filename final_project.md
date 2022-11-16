@@ -386,16 +386,16 @@ resultLFC
 # MA-plot to visualize the log2 fold change attributable to a given variable over the mean of normalized counts in the samples in the DES_dataset
 
 ``` r
-# I will make one plot with the normal data and the other one with shrink the effect size
+#I will make one plot with the normal data and the other one with shrink the effect size
 plotMA(result_table, ylim=c(-2,2))
 ```
-![](final_project_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![unnamed-chunk-10-1](https://user-images.githubusercontent.com/113143969/202277051-2dd51dbe-9523-4452-84b7-f8afe278be6e.png)
 
 ``` r
 plotMA(resultLFC, ylim=c(-2,2))
 ```
+![unnamed-chunk-10-2](https://user-images.githubusercontent.com/113143969/202277213-96049c79-189f-4c8d-9727-fdc662bf0406.png)
 
-![](final_project_files/figure-gfm/unnamed-chunk-10-2.png)<!-- --> \#
 Set alpha to 0.05 for p-value and print the summary
 
 ``` r
@@ -425,8 +425,7 @@ sum(result05$padj < 0.05, na.rm = TRUE)
 ``` r
 plotCounts(DES_dataset, gene = which.min(result05$padj), intgroup = "alcohol_history")
 ```
-
-![](final_project_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![unnamed-chunk-12-1](https://user-images.githubusercontent.com/113143969/202277312-3557ca21-e15a-4720-b67f-7447a4665e23.png)
 
 # Extracting transformed values by using variance stabilizing transformation (VST) and regularized log transformation
 
@@ -495,21 +494,21 @@ meanSdPlot(assay(ntd))
 
     ## Also defined by 'hexbin'
 
-![](final_project_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![unnamed-chunk-14-1](https://user-images.githubusercontent.com/113143969/202277475-9ef93faa-067f-4d1a-9a95-2f558249c6fc.png)
 
 ``` r
 # using VST
 meanSdPlot(assay(vsd))
 ```
 
-![](final_project_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![unnamed-chunk-14-2](https://user-images.githubusercontent.com/113143969/202277529-200013e9-12bd-4143-a623-7f34266228a1.png)
 
 ``` r
 # using rlog
 meanSdPlot(assay(rld))
 ```
 
-![](final_project_files/figure-gfm/unnamed-chunk-14-3.png)<!-- -->
+![unnamed-chunk-14-3](https://user-images.githubusercontent.com/113143969/202277597-1ff33078-4c7b-46e7-a8cb-b0ec6fd3908c.png)
 
 # Data quality assessment by sample clustering and visualization
 
@@ -535,20 +534,21 @@ pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_c
 
     ## Also defined by 'hexbin'
 
-![](final_project_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![unnamed-chunk-16-1](https://user-images.githubusercontent.com/113143969/202277724-246dbff9-2b4e-468a-b04f-d236f7d8d8e7.png)
 
 ``` r
 pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
 ```
 
-![](final_project_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+![unnamed-chunk-16-2](https://user-images.githubusercontent.com/113143969/202277766-06ff22a2-9ac7-41c6-a5c6-32916278dd7e.png)
 
 ``` r
 pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
 ```
 
-![](final_project_files/figure-gfm/unnamed-chunk-16-3.png)<!-- --> \#
-Sample-to-Sample distances
+![unnamed-chunk-16-3](https://user-images.githubusercontent.com/113143969/202277889-d0749f9c-b00d-4a48-ac53-5aeff1b07653.png)
+
+#Sample-to-Sample distances
 
 ``` r
 sampleDists <- dist(t(assay(vsd)))
@@ -556,7 +556,7 @@ DistMatrix <- as.matrix(sampleDists)
 pheatmap(DistMatrix)
 ```
 
-![](final_project_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![unnamed-chunk-17-1](https://user-images.githubusercontent.com/113143969/202277961-02830854-56bf-476c-b187-660cee9c610c.png)
 
 # Principal Component Analysis Plot
 
@@ -564,4 +564,4 @@ pheatmap(DistMatrix)
 plotPCA(vsd, intgroup="alcohol_history")
 ```
 
-![](final_project_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![unnamed-chunk-18-1](https://user-images.githubusercontent.com/113143969/202278003-3d889ce5-3e16-41cf-a63a-3ee6299d0c6a.png)
