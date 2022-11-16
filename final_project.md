@@ -1,7 +1,5 @@
 final_project
 ================
-Eun K Sung
-2022-11-16
 
 # **Title**
 
@@ -38,9 +36,7 @@ by STAR.
 
 ## Creating Sample Sheet
 
-|                                   |
-|-----------------------------------|
-| we are going to use R from now on |
+
 
 ## Load package into your library in RStudio
 
@@ -50,137 +46,15 @@ expression analysis.
 ``` r
 library(tibble)
 library(tidyverse)
-```
-
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.4.1 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
-    ## ✔ purrr   0.3.5      
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-``` r
 library(apeglm)
 library(ggplot2)
 library(vsn)
-```
-
-    ## Loading required package: Biobase
-    ## Loading required package: BiocGenerics
-    ## 
-    ## Attaching package: 'BiocGenerics'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     combine, intersect, setdiff, union
-    ## 
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     IQR, mad, sd, var, xtabs
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     anyDuplicated, append, as.data.frame, basename, cbind, colnames,
-    ##     dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
-    ##     grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
-    ##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
-    ##     rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
-    ##     union, unique, unsplit, which.max, which.min
-    ## 
-    ## Welcome to Bioconductor
-    ## 
-    ##     Vignettes contain introductory material; view with
-    ##     'browseVignettes()'. To cite Bioconductor, see
-    ##     'citation("Biobase")', and for packages 'citation("pkgname")'.
-
-``` r
 library(pheatmap)
 library(ReportingTools)
-```
-
-    ## Loading required package: knitr
-    ## 
-    ## Registered S3 method overwritten by 'GGally':
-    ##   method from   
-    ##   +.gg   ggplot2
-
-``` r
 library(DESeq2)
 ```
 
-    ## Loading required package: S4Vectors
-    ## Loading required package: stats4
-    ## 
-    ## Attaching package: 'S4Vectors'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     first, rename
-    ## 
-    ## The following object is masked from 'package:tidyr':
-    ## 
-    ##     expand
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     expand.grid, I, unname
-    ## 
-    ## Loading required package: IRanges
-    ## 
-    ## Attaching package: 'IRanges'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     collapse, desc, slice
-    ## 
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     reduce
-    ## 
-    ## Loading required package: GenomicRanges
-    ## Loading required package: GenomeInfoDb
-    ## Loading required package: SummarizedExperiment
-    ## Loading required package: MatrixGenerics
-    ## Loading required package: matrixStats
-    ## 
-    ## Attaching package: 'matrixStats'
-    ## 
-    ## The following objects are masked from 'package:Biobase':
-    ## 
-    ##     anyMissing, rowMedians
-    ## 
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     count
-    ## 
-    ## 
-    ## Attaching package: 'MatrixGenerics'
-    ## 
-    ## The following objects are masked from 'package:matrixStats':
-    ## 
-    ##     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
-    ##     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
-    ##     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
-    ##     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
-    ##     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
-    ##     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
-    ##     colWeightedMeans, colWeightedMedians, colWeightedSds,
-    ##     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
-    ##     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
-    ##     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
-    ##     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
-    ##     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
-    ##     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
-    ##     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
-    ##     rowWeightedSds, rowWeightedVars
-    ## 
-    ## The following object is masked from 'package:Biobase':
-    ## 
-    ##     rowMedians
-
-if you do not have any one of them, please use the command:
+If you do not have any one of them, please use the command:
 
 ``` r
 if (!require("BiocManager", quietly = TRUE))
