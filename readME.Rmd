@@ -1,0 +1,244 @@
+---
+title: "Final_Project"
+output: html_notebook
+---
+
+# **Title**
+
+Differential Gene Expression in TCGA Cohort of Esophageal Adenocarcinomas comparing by Alcohol Consumption with using DeSEQ2
+
+# **Author**
+
+Eun K. Sung
+
+# **Overview of Project**
+
+I am going to identify different gene expressions between esophageal adenocarcionmas patients with alcohol consumption history and non-alcohol consumption history. I utilize GDC Data Portal and have found 86 samples fit within my cohort. I have picked 30 samples for alcohol consumption cohort and 28 samples for non-alcohol consumption cohort. I will utilize the package DeSEQ2 for this differential gene expression analysis and follow the specific vignette: [Analyzing RNA-Seq Data with DeSEQ2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
+
+# **Data**
+
+I will use the data from [GDC Data Portal](https://portal.gdc.cancer.gov/repository) There are 1,138 samples of esophageal adenocarcinomas. By examining clinical data, there are 86 samples defined by alcohol consumption history. All 28 samples of non-alcohol consumption history have gene counts file by STAR. I have selected 30 samples of alcohol consumption history with gene counts file by STAR.
+
+# **Method**
+
+## Creating Raw Count Matrix
+
+I will utilize unstrand counts in this differential expression analysis because I do not know of the strand-specific protocol of this dataset
+
+extract the column #4 which is unstranded counts of the sample
+
+```{bash}
+awk'{print $4}' AASX.tsv > AASX.txt
+```
+
+remove the first line of the file without printing
+
+```{bash}
+tail -n +2 AASX.txt > AASX.tmp && mv AASX.tmp AASX.txt
+```
+
+replace_header.sh to change the column of each .txt file to its file name
+
+```{bash}
+./replace_header.sh
+```
+
+extract the gene_id, the column #1, from one of .tsv file
+
+```{bash}
+awk '{print $1}' A4OS.tsv > gene_id.txt
+```
+
+remove the first line of the file without printing
+
+```{bash}
+tail -n +2 gene_id.txt > gene_id.tmp && mv gene_id.tmp gene_id.txt
+```
+
+remove row #2 to #4
+
+```{bash}
+awk '!/^N_*/' gene_id.txt > gene_id.tmp && mv gene_id.tmp gene_id.txt
+```
+
+merged counts
+
+```{bash}
+paste gene_id.txt A4OF.txt A4OJ.txt A4OR.txt A4OS.txt A4QS.txt A6BV.txt A6DN.txt A6DQ.txt A6FB.txt A6FH.txt A6FW.txt A6KZ.txt A6L4.txt A6L6.txt A6XG.txt A6Y0.txt A7BO.txt A7RE.txt A88T.txt A88V.txt A891.txt A8EQ.txt A8NF.txt A8NG.txt A8NH.txt A8NI.txt A8NJ.txt A8NL.txt A8NM.txt A8NR.txt A8NS.txt A8NU.txt A8NV.txt A8W8.txt A8WC.txt A8WG.txt A939.txt A93C.txt A93D.txt A93E.txt A9CJ.txt A9GF.txt A9GH.txt A9GI.txt A9GJ.txt A9GK.txt A9GL.txt A9GM.txt A9GN.txt A9GO.txt A9GQ.txt A9GR.txt A9W5.txt AA4D.txt AASW.txt AASX.txt > merged_gene_counts.txt
+```
+
+## Creating Sample Sheet
+
+I change the sample id in the sample_sheet.tsv in order to match with the sample id in the count_matrix.txt. Also, I change the 1st column name to "sample_id" from "case_submitter_id"
+
+```{bash}
+sed 's/^TCGA-.*-//g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+
+sed 's/case_submitter_id/sample_id/g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+```
+
+
+## Load package into your library in RStudio
+
+we are going to utilize these packages through this differential expression analysis.
+
+```{r}
+library(tidyverse)
+library(tibble)
+library(apeglm)
+library(ggplot2)
+library(vsn)
+library(pheatmap)
+library(ReportingTools)
+library(DESeq2)
+```
+
+if you do not have any one of them, please use the command:
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+library(BiocManager)
+BiocManager::install("Named The Package You Need")
+```
+
+## Setting Working Directory and Wrangling the Raw Count Matrix and Sample Sheet
+
+```{r}
+setwd('~/Desktop/final_project')
+
+# Read in the matrix
+count_matrix <- read.delim("~/Desktop/raw_data/merged_gene_counts.txt", header=T, sep="\t")
+
+# Found Issue: I was not able to change gene_id (1st column) into a row name and found that I did not remove row #2 to #4 completely in the previous step
+# I delete last 4 rows here
+count_matrix <- head(count_matrix, - 4)
+
+# Change column #1 into row name and delete the column #1 after that
+row.names(count_matrix) <- count_matrix$gene_id
+count_matrix <- count_matrix[-c(1)]
+
+# Read in the sample sheet
+sampletable <- read_tsv('~/Desktop/raw_data/sample_sheet.tsv')
+
+# Change column #1 (sample_id) into row name
+row.names(sampletable) <- sampletable$sample_id
+
+# Change data type from character to factor
+sampletable$alcohol_history <- as.factor(sampletable$alcohol_history)
+```
+
+## Create DESeq2 object
+
+```{r}
+DES_dataset <- DESeqDataSetFromMatrix(countData = count_matrix,
+                                         colData = sampletable,
+                                         design = ~ alcohol_history)
+```
+
+## Filtering
+
+```{r}
+# Number of gene before filtering
+nrow(DES_dataset)
+
+# Filtering to keep only rows that have at least 10 reads total
+DES_dataset <- DES_dataset[rowSums(counts(DES_dataset)) > 10, ]
+
+# Number of gene after filtering
+nrow(DES_dataset)
+```
+
+# Performing standard differential expression analysis
+```{r}
+DES_dataset <- DESeq(DES_dataset)
+```
+
+# Using "ReportingTools" to get result table of differential expression analysis
+```{r}
+DES2Report <- HTMLReport(shortName = 'RNAseq_Analysis_with_DEseq2', title = 'Differential Expression Analysis in EAC', reportDirectory = "./reports")
+publish(DES_dataset,DES2Report, pvalueCutoff=0.05, annotation.db="org.Mm.eg.db", factor = colData(DES_dataset)$alcohol_history, reportDir="./reports")
+finish(DES2Report)
+```
+This result table is more interactive compare to the regular result table, which we will make it in the next step.  
+You can double click "RNAseq_Analysis_with_DEseq2.html" file to open it.
+
+# Generating a result table and print it
+```{r}
+result_table <- results(DES_dataset)
+result_table
+```
+
+# Utilize "lfcShrink" function to shrink the effect size with apeglm method and print it
+```{r}
+resultLFC <- lfcShrink(DES_dataset, coef = "alcohol_history_Yes_vs_No", type = "apeglm")
+resultLFC
+```
+
+# MA-plot to visualize the log2 fold change attributable to a given variable over the mean of normalized counts in the samples in the DES_dataset
+```{r}
+# I will make one plot with the normal data and the other one with shrink the effect size
+plotMA(result_table, ylim=c(-2,2))
+plotMA(resultLFC, ylim=c(-2,2))
+```
+# Set alpha to 0.05 for p-value and print the summary
+```{r}
+result05 <- results(DES_dataset, alpha = 0.05)
+summary(result05)
+
+sum(result05$padj < 0.05, na.rm = TRUE)
+```
+
+# Use "plotCounts" function to make a plot for the read counts of single gene across the groups
+```{r}
+plotCounts(DES_dataset, gene = which.min(result05$padj), intgroup = "alcohol_history")
+```
+
+# Extracting transformed values by using variance stabilizing transformation (VST) and regularized log transformation
+```{r}
+vsd <- vst(DES_dataset, blind = FALSE)
+rld <- rlog(DES_dataset, blind = FALSE)
+head(assay(vsd), 3)
+```
+
+# Effects of transformations on the variance
+```{r}
+# this gives log2(n+1)
+ntd <- normTransform(DES_dataset)
+meanSdPlot(assay(ntd))
+
+# using VST
+meanSdPlot(assay(vsd))
+
+# using rlog
+meanSdPlot(assay(rld))
+```
+
+# Data quality assessment by sample clustering and visualization
+```{r}
+select <- order(rowMeans(counts(DES_dataset,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(DES_dataset)[,c("sample_id", "alcohol_history")])
+row.names(df) <- df$sample_id
+df <- df[-c(1)]
+```
+
+# Using normal transform, variance stabilizing transformation, and regularized log transformation to make a heatmap
+```{r}
+pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
+
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
+```
+# Sample-to-Sample distances
+```{r}
+sampleDists <- dist(t(assay(vsd)))
+DistMatrix <- as.matrix(sampleDists)
+pheatmap(DistMatrix)
+```
+
+# Principal Component Analysis Plot
+```{r}
+plotPCA(vsd, intgroup="alcohol_history")
+```
