@@ -3,7 +3,18 @@ final_project
 Eun K Sung
 2022-11-16
 
-# **Title**
+# **Title**![unnamed-chunk-10-1](https://user-images.githubusercontent.com/113143969/202275426-6c0a501e-dec8-4fbc-8133-00a14ca69efa.png)
+
+![unnamed-chunk-10-2](https://user-images.githubusercontent.com/113143969/202275456-4c93faeb-68fd-43aa-8f0a-1c4e0941fd82.png)
+![unnamed-chunk-12-1](https://user-images.githubusercontent.com/113143969/202275460-e48ec0a7-e5ce-470e-bf03-f42fdce20c91.png)
+![unnamed-chunk-14-1](https://user-images.githubusercontent.com/113143969/202275462-fdcbbccc-ac38-4fb2-9bbf-4d05e6d1b05a.png)
+![unnamed-chunk-14-2](https://user-images.githubusercontent.com/113143969/202275465-9347a402-23d7-45b7-9fba-2e84a795c8fc.png)
+![unnamed-chunk-14-3](https://user-images.githubusercontent.com/113143969/202275468-7da0b41e-1703-48a4-8b23-22e5f4504d22.png)
+![unnamed-chunk-16-1](https://user-images.githubusercontent.com/113143969/202275470-c71fbd6f-69a9-4771-b57c-51c838bbfba7.png)
+![unnamed-chunk-16-2](https://user-images.githubusercontent.com/113143969/202275472-e5906554-751d-4a3d-a2dc-b675cbe6f8e5.png)
+![unnamed-chunk-16-3](https://user-images.githubusercontent.com/113143969/202275474-b2cd068c-a973-4556-95ee-18eb3391b6d3.png)
+![unnamed-chunk-17-1](https://user-images.githubusercontent.com/113143969/202275476-efb201ae-e237-4a5a-aeaf-ee16df0e2eb3.png)
+![unnamed-chunk-18-1](https://user-images.githubusercontent.com/113143969/202275480-750b6dc0-9b31-4f76-9cba-707e33f9f2ec.png)
 
 Differential Gene Expression in TCGA Cohort of Esophageal
 Adenocarcinomas comparing by Alcohol Consumption with using DeSEQ2
