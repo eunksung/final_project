@@ -44,6 +44,29 @@ to handle the data more efficiently and properly.
 I will utilize unstrand counts in this differential expression analysis
 because I do not know of the strand-specific protocol of this dataset
 
+
+Change your directory to where you downloaded and saved the "raw_data"
+Execute "rm_outlier.sh"
+```{bash}
+cd /PATH/To/Your/Directory
+./rm_outlier.sh
+```
+
+Merge all sample count files by paste command. "gene_id.txt" must be the first file when you merge them to create "merged_gene_counts.txt"
+```{bash}
+paste gene_id.txt A4OF.txt A4OJ.txt A4OR.txt A4OS.txt A4QS.txt A6BV.txt A6DN.txt A6DQ.txt A6FB.txt A6FH.txt A6FW.txt A6KZ.txt A6L4.txt A6L6.txt A6XG.txt A6Y0.txt A7BO.txt A7RE.txt A88T.txt A88V.txt A891.txt A8EQ.txt A8NF.txt A8NG.txt A8NH.txt A8NI.txt A8NJ.txt A8NL.txt A8NM.txt A8NR.txt A8NS.txt A8NU.txt A8NV.txt A8W8.txt A8WC.txt A8WG.txt A939.txt A93C.txt A93D.txt A93E.txt A9CJ.txt A9GF.txt A9GH.txt A9GI.txt A9GJ.txt A9GK.txt A9GL.txt A9GM.txt A9GN.txt A9GO.txt A9GQ.txt A9GR.txt A9W5.txt AA4D.txt AASW.txt AASX.txt > merged_gene_counts.txt
+```
+
+## Creating Sample Sheet
+
+I change the sample id in the sample_sheet.tsv in order to match with the sample id in the count_matrix.txt. Also, I change the 1st column name to "sample_id" from "case_submitter_id"
+
+```{bash}
+sed 's/^TCGA-.*-//g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+
+sed 's/case_submitter_id/sample_id/g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+```
+
 ## Load package into your library in RStudio
 
 we are going to utilize these packages through this differential
@@ -51,136 +74,14 @@ expression analysis.
 
 ``` r
 library(tidyverse)
-```
-
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
-    ## ✔ ggplot2 3.4.0      ✔ purrr   0.3.5 
-    ## ✔ tibble  3.1.8      ✔ dplyr   1.0.10
-    ## ✔ tidyr   1.2.1      ✔ stringr 1.4.1 
-    ## ✔ readr   2.1.3      ✔ forcats 0.5.2 
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-``` r
 library(tibble)
 library(apeglm)
 library(ggplot2)
 library(vsn)
-```
-
-    ## Loading required package: Biobase
-    ## Loading required package: BiocGenerics
-    ## 
-    ## Attaching package: 'BiocGenerics'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     combine, intersect, setdiff, union
-    ## 
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     IQR, mad, sd, var, xtabs
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     anyDuplicated, append, as.data.frame, basename, cbind, colnames,
-    ##     dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
-    ##     grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
-    ##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
-    ##     rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
-    ##     union, unique, unsplit, which.max, which.min
-    ## 
-    ## Welcome to Bioconductor
-    ## 
-    ##     Vignettes contain introductory material; view with
-    ##     'browseVignettes()'. To cite Bioconductor, see
-    ##     'citation("Biobase")', and for packages 'citation("pkgname")'.
-
-``` r
 library(pheatmap)
 library(ReportingTools)
-```
-
-    ## Loading required package: knitr
-    ## 
-    ## Registered S3 method overwritten by 'GGally':
-    ##   method from   
-    ##   +.gg   ggplot2
-
-``` r
 library(DESeq2)
 ```
-
-    ## Loading required package: S4Vectors
-    ## Loading required package: stats4
-    ## 
-    ## Attaching package: 'S4Vectors'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     first, rename
-    ## 
-    ## The following object is masked from 'package:tidyr':
-    ## 
-    ##     expand
-    ## 
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     expand.grid, I, unname
-    ## 
-    ## Loading required package: IRanges
-    ## 
-    ## Attaching package: 'IRanges'
-    ## 
-    ## The following objects are masked from 'package:dplyr':
-    ## 
-    ##     collapse, desc, slice
-    ## 
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     reduce
-    ## 
-    ## Loading required package: GenomicRanges
-    ## Loading required package: GenomeInfoDb
-    ## Loading required package: SummarizedExperiment
-    ## Loading required package: MatrixGenerics
-    ## Loading required package: matrixStats
-    ## 
-    ## Attaching package: 'matrixStats'
-    ## 
-    ## The following objects are masked from 'package:Biobase':
-    ## 
-    ##     anyMissing, rowMedians
-    ## 
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     count
-    ## 
-    ## 
-    ## Attaching package: 'MatrixGenerics'
-    ## 
-    ## The following objects are masked from 'package:matrixStats':
-    ## 
-    ##     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
-    ##     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
-    ##     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
-    ##     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
-    ##     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
-    ##     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
-    ##     colWeightedMeans, colWeightedMedians, colWeightedSds,
-    ##     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
-    ##     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
-    ##     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
-    ##     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
-    ##     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
-    ##     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
-    ##     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
-    ##     rowWeightedSds, rowWeightedVars
-    ## 
-    ## The following object is masked from 'package:Biobase':
-    ## 
-    ##     rowMedians
 
 ## Setting Working Directory and Wrangling the Raw Count Matrix and Sample Sheet
 
@@ -196,22 +97,9 @@ count_matrix <- count_matrix[-c(1)]
 
 # Read in the sample sheet
 sampletable <- read_tsv('~/Desktop/raw_data/sample_sheet.tsv')
-```
-
-    ## Rows: 56 Columns: 2
-    ## ── Column specification ────────────────────────────────────────────────────────
-    ## Delimiter: "\t"
-    ## chr (2): sample_id, alcohol_history
-    ## 
-    ## ℹ Use `spec()` to retrieve the full column specification for this data.
-    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-
-``` r
 # Change column #1 (sample_id) into row name
 row.names(sampletable) <- sampletable$sample_id
 ```
-
-    ## Warning: Setting row names on a tibble is deprecated.
 
 ``` r
 # Change data type from character to factor
@@ -250,26 +138,6 @@ nrow(DES_dataset)
 ``` r
 DES_dataset <- DESeq(DES_dataset)
 ```
-
-    ## estimating size factors
-
-    ## estimating dispersions
-
-    ## gene-wise dispersion estimates
-
-    ## mean-dispersion relationship
-
-    ## final dispersion estimates
-
-    ## fitting model and testing
-
-    ## -- replacing outliers and refitting for 3885 genes
-    ## -- DESeq argument 'minReplicatesForReplace' = 7 
-    ## -- original counts are preserved in counts(dds)
-
-    ## estimating dispersions
-
-    ## fitting model and testing
 
 # Using “ReportingTools” to get result table of differential expression analysis
 
