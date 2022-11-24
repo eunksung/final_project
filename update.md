@@ -43,6 +43,25 @@ to handle the data more efficiently and properly.
 
 I will utilize unstrand counts in this differential expression analysis
 because I do not know of the strand-specific protocol of this dataset
+```{bash}
+# **All Raw data files and rm_oulier.sh have to be in the same folder/directory**
+CD /TO/YOUR/DIRECTORY/
+./rm_outlier.sh
+```
+
+merged counts
+```{bash}
+paste gene_id.txt A4OF.txt A4OJ.txt A4OR.txt A4OS.txt A4QS.txt A6BV.txt A6DN.txt A6DQ.txt A6FB.txt A6FH.txt A6FW.txt A6KZ.txt A6L4.txt A6L6.txt A6XG.txt A6Y0.txt A7BO.txt A7RE.txt A88T.txt A88V.txt A891.txt A8EQ.txt A8NF.txt A8NG.txt A8NH.txt A8NI.txt A8NJ.txt A8NL.txt A8NM.txt A8NR.txt A8NS.txt A8NU.txt A8NV.txt A8W8.txt A8WC.txt A8WG.txt A939.txt A93C.txt A93D.txt A93E.txt A9CJ.txt A9GF.txt A9GH.txt A9GI.txt A9GJ.txt A9GK.txt A9GL.txt A9GM.txt A9GN.txt A9GO.txt A9GQ.txt A9GR.txt A9W5.txt AA4D.txt AASW.txt AASX.txt > merged_gene_counts.txt
+```
+
+## Creating Sample Sheet
+
+I change the sample id in the sample_sheet.tsv in order to match with the sample id in the count_matrix.txt. Also, I change the 1st column name to "sample_id" from "case_submitter_id"
+```{bash}
+sed 's/^TCGA-.*-//g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+
+sed 's/case_submitter_id/sample_id/g' sample_sheet.tsv > sample_sheet.tmp && mv sample_sheet.tmp sample_sheet.tsv
+```
 
 ## Load package into your library in RStudio
 
