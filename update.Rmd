@@ -1,0 +1,232 @@
+---
+title: "update"
+author: "Eun K Sung"
+output: github_document
+---
+
+# **Title**
+
+Differential Gene Expression in TCGA Cohort of Esophageal Adenocarcinomas comparing by Alcohol Consumption with using DeSEQ2
+
+# **Author**
+
+Eun K. Sung
+
+# **Overview of Project**
+
+I am going to identify different gene expressions between esophageal adenocarcionmas patients with alcohol consumption history and non-alcohol consumption history. I utilize GDC Data Portal and have found 86 samples fit within my cohort. I have picked 30 samples for alcohol consumption cohort and 28 samples for non-alcohol consumption cohort. I will utilize the package DeSEQ2 for this differential gene expression analysis and follow the specific vignette: [Analyzing RNA-Seq Data with DeSEQ2](http://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html)
+
+# **Data**
+
+I will use the data from [GDC Data Portal](https://portal.gdc.cancer.gov/repository) There are 1,138 samples of esophageal adenocarcinomas. By examining clinical data, there are 86 samples defined by alcohol consumption history. All 28 samples of non-alcohol consumption history have gene counts file by STAR. I have selected 30 samples of alcohol consumption history with gene counts file by STAR.
+
+### Known Issue
+Previously I found an issue with outliers due to mis-handling the data. Here I have fixed the issue and utilized newly scripted "rm_outlier.sh" to handle the data more efficiently and properly.
+
+## Creating Raw Count Matrix
+
+I will utilize unstrand counts in this differential expression analysis because I do not know of the strand-specific protocol of this dataset
+
+## Load package into your library in RStudio
+
+we are going to utilize these packages through this differential expression analysis.
+
+```{r}
+library(tidyverse)
+library(tibble)
+library(apeglm)
+library(ggplot2)
+library(vsn)
+library(pheatmap)
+library(ReportingTools)
+library(DESeq2)
+```
+
+## Setting Working Directory and Wrangling the Raw Count Matrix and Sample Sheet
+
+```{r}
+setwd('~/Desktop/final_project')
+
+# Read in the matrix
+count_matrix <- read.delim("~/Desktop/raw_data/merged_gene_counts.txt", header=T, sep="\t")
+
+# Change column #1 into row name and delete the column #1 after that
+row.names(count_matrix) <- count_matrix$gene_id
+count_matrix <- count_matrix[-c(1)]
+
+# Read in the sample sheet
+sampletable <- read_tsv('~/Desktop/raw_data/sample_sheet.tsv')
+
+# Change column #1 (sample_id) into row name
+row.names(sampletable) <- sampletable$sample_id
+
+# Change data type from character to factor
+sampletable$alcohol_history <- as.factor(sampletable$alcohol_history)
+```
+
+## Create DESeq2 object
+```{r}
+DES_dataset <- DESeqDataSetFromMatrix(countData = count_matrix,
+                                         colData = sampletable,
+                                         design = ~ alcohol_history)
+```
+
+## Filtering
+```{r}
+# Number of gene before filtering
+nrow(DES_dataset)
+
+# Filtering to keep only rows that have at least 10 reads total
+DES_dataset <- DES_dataset[rowSums(counts(DES_dataset)) > 10, ]
+
+# Number of gene after filtering
+nrow(DES_dataset)
+```
+
+# Performing standard differential expression analysis
+```{r}
+DES_dataset <- DESeq(DES_dataset)
+```
+
+# Using "ReportingTools" to get result table of differential expression analysis
+```{r}
+DES2Report <- HTMLReport(shortName = 'RNAseq_Analysis_with_DEseq2', title = 'Differential Expression Analysis in EAC', reportDirectory = "./reports")
+publish(DES_dataset,DES2Report, pvalueCutoff=0.01, annotation.db="org.Mm.eg.db", factor = colData(DES_dataset)$alcohol_history, reportDir="./reports")
+finish(DES2Report)
+```
+This result table is more interactive compare to the regular result table, which we will make it in the next step.  
+I uploaded this interactive to my Github "final_project" repository:
+
+# Generating a result table and print it
+```{r}
+result_table <- results(DES_dataset)
+result_table
+```
+
+# MA-plot to visualize the log2 fold change attributable to a given variable over the mean of normalized counts in the samples in the DES_dataset
+```{r}
+# I will make one plot with the normal data and the other one with shrink the effect size
+plotMA(result_table, ylim=c(-2,2))
+```
+
+# Set alpha to 0.05 for p-value and print the summary
+```{r}
+result001 <- results(DES_dataset, alpha = 0.01)
+summary(result001)
+
+sum(result001$padj < 0.01, na.rm = TRUE)
+```
+
+# Use "plotCounts" function to make a plot for the read counts of single gene across the groups
+```{r}
+plotCounts(DES_dataset, gene = which.min(result001$padj), intgroup = "alcohol_history")
+```
+
+# Extracting transformed values by using variance stabilizing transformation
+```{r}
+vsd <- vst(DES_dataset, blind = FALSE)
+head(assay(vsd), 3)
+```
+
+# Effects of transformations on the variance
+```{r}
+# using Variance Stabilizing Transformation (VST)
+meanSdPlot(assay(vsd))
+```
+
+# Data quality assessment by sample clustering and visualization
+```{r}
+select <- order(rowMeans(counts(DES_dataset,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(DES_dataset)[,c("sample_id", "alcohol_history")])
+row.names(df) <- df$sample_id
+df <- df[-c(1)]
+```
+
+# Using Variance stabilizing transformation to generate a heatmap
+```{r}
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
+```
+
+# Sample-to-Sample distances
+```{r}
+sampleDists <- dist(t(assay(vsd)))
+DistMatrix <- as.matrix(sampleDists)
+pheatmap(DistMatrix)
+```
+
+# Principal Component Analysis Plot
+```{r}
+plotPCA(vsd, intgroup="alcohol_history")
+```
+
+# Volcano Plot
+```{r}
+with(result_table, plot(log2FoldChange, -log10(padj), pch=20, cex=1.0, xlab=bquote(~Log[2]~fold~change), ylab=bquote(~-log[10]~Q~value)))
+with(subset(result_table, padj<0.01 & abs(log2FoldChange)>2), points(log2FoldChange, -log10(padj), pch=20, col="red", cex=0.5))
+```
+
+# Filtering and Count of the resulted
+```{r}
+up <- result_table$log2FoldChange > 3 & result_table$padj < 0.0001
+down <- result_table$log2FoldChange < -3 & result_table$padj < 0.0001
+table(up)["TRUE"]
+table(down)["TRUE"]
+```
+
+```{r}
+up <- result_table$log2FoldChange > 4 & result_table$padj < 0.0005
+down <- result_table$log2FoldChange < -4 & result_table$padj < 0.0005
+table(up)["TRUE"]
+table(down)["TRUE"]
+```
+
+# Subsetting, formatting into dataframe, and Merging to create **data matrix** with abs(Log2FoldChange > 4 & padj<0.0005
+```{r}
+up_sub <- subset(result_table, abs(log2FoldChange) > 4 & padj < 0.0005)
+Sig_dataset <- as.data.frame(up_sub)
+gene_id <- tibble::rownames_to_column(Sig_dataset, "gene_id")
+gene_id <- c(gene_id$gene_id)
+gene_id <- as.data.frame(gene_id)
+# Read in Data Matrxi
+count_geneid <- read.delim("~/Desktop/raw_data/merged_gene_counts.txt", header=T, sep="\t")
+sig_df = count_geneid %>% inner_join(gene_id,by="gene_id")
+# Change column #1 into row name and delete the column #1 after that
+row.names(sig_df) <- sig_df$gene_id
+sig_df <- sig_df[-c(1)]
+```
+
+
+# Create DESeq2 object
+```{r}
+Sig_DES <-  DESeqDataSetFromMatrix(countData = sig_df,
+                                         colData = sampletable,
+                                         design = ~ alcohol_history)
+```
+
+# Performing standard differential expression analysis
+```{r}
+Sig_DES <- DESeq(Sig_DES)
+```
+
+# Extracting transformed values by using variance stabilizing transformation
+```{r}
+Sig_vsd <- vst(DES_dataset, blind = FALSE)
+```
+
+# PCA
+```{r}
+plotPCA(Sig_vsd, intgroup="alcohol_history")
+```
+
+# Volcano Plot with abs(Log2FoldChange > 4 & padj<0.0005
+```{r}
+with(result_table, plot(log2FoldChange, -log10(padj), pch=20, cex=1.0, xlab=bquote(~Log[2]~fold~change), ylab=bquote(~-log[10]~Q~value)))
+with(subset(result_table, padj<0.0005 & abs(log2FoldChange)>4), points(log2FoldChange, -log10(padj), pch=20, col="red", cex=0.5))
+```
+
+# Using Variance stabilizing transformation to generate a heatmap
+```{r}
+pheatmap(assay(Sig_vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=df)
+```
+
