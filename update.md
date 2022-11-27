@@ -410,30 +410,6 @@ Sig_DES <-  DESeqDataSetFromMatrix(countData = sig_df,
 Sig_DES <- DESeq(Sig_DES)
 ```
 
-    ## estimating size factors
-
-    ## estimating dispersions
-
-    ## gene-wise dispersion estimates
-
-    ## mean-dispersion relationship
-
-    ## -- note: fitType='parametric', but the dispersion trend was not well captured by the
-    ##    function: y = a/x + b, and a local regression fit was automatically substituted.
-    ##    specify fitType='local' or 'mean' to avoid this message next time.
-
-    ## final dispersion estimates
-
-    ## fitting model and testing
-
-    ## -- replacing outliers and refitting for 37 genes
-    ## -- DESeq argument 'minReplicatesForReplace' = 7 
-    ## -- original counts are preserved in counts(dds)
-
-    ## estimating dispersions
-
-    ## fitting model and testing
-
 # Extracting transformed values by using variance stabilizing transformation
 
 ``` r
