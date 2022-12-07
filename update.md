@@ -440,3 +440,14 @@ pheatmap(assay(Sig_vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE, clust
 ```
 
 ![](update_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+# Up- and Down-regulated Gene lists
+Previously, I reported number of upregulated and downregulated genes: two genes were upregulated and Eighty-six genes were downregulated. However, I did not provide the list of those gene. I uploaded the genes list with a csv file to my final project repository: [alcohol_vs_non_alcohol.csv](https://github.com/eunksung/final_project/blob/main/alcohol_vs_non_alcohol.csv)
+
+# Knwon Issues
+When I checked the sample donors's clinical data, I found some donors have records of smoking cigarettes.  This might be resulted in confounding effects in this gene expression analysis.
+
+# Conclusion
+I found some genes differentially expressed between alcohol and non-alcohol groups in esophageal cancer samples. However, I was not able to find the relationship between those upregulated and downregulated genes when I did Gene Set Enrichment Analysis (GSEA). Only 2 or 3 genes out of couple hundreds genes were matched to the curated pathways with the set of downregulated gene: [Downregulated gene match](https://www.ndexbio.org/iquery/7b2c3cf3-a7a8-4aa5-ac13-928eecfd2534/7a7c4019-104e-42f5-82e9-3097bc8b183f/b27ee505-5c67-11ec-b3be-0ac135e8bacf).
+
+For future analysis, I would like to add one more variable, which I missed in here: cigarettes smoking. In addition, I would like to increase sample numbers and make a differentail gene expression analysis on a certain stage in the esophageal cancer to clear define the genes expessing differently due to alcohol and smoking.
